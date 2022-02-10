@@ -79,7 +79,7 @@ function max()
 function getTitle($id)
 {
     $sth = connect()->prepare("
-    SELECT name FROM categories
+    SELECT category FROM categories
     WHERE categories.id = :id");
     $sth->execute([':id' => $id]);
 

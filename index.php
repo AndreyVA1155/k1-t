@@ -34,7 +34,7 @@ if (!empty($_GET['categories']) || isset($_SESSION['categories'])) {
     $categories = $_GET['categories'];
     $categories = $_SESSION['categories'];
     $where .= 'AND categories.id = ' . intval($categories);
-    $title = getTitle($categories)[0]['name'];
+    $title = getTitle($categories)[0]['category'];
     $allProductsCategory = getAllProductsCategory($categories);
 
 }
@@ -179,6 +179,7 @@ $data = array(
     'categories' => $_SESSION['category']
 );
 $urls = '/?' .  http_build_query($data);
+
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/header.php';
 ?>
