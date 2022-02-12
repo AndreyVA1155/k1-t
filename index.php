@@ -4,21 +4,6 @@ namespace functionAll;
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
 session_start();
-if($_SERVER["REQUEST_URI"] == '/') {
-    //$_SESSION['categories'] = null;
-    $_SESSION['minPrice'] = null;
-    $_SESSION['maxPrice'] = null;
-    $_SESSION['sort'] = null;
-    $_SESSION['order'] = null;
-}
-
-if(!isset($_GET['new'])) {
-    $_SESSION['new'] = null;
-}
-
-if(!isset($_GET['sale'])) {
-    $_SESSION['sale'] = null;
-}
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/function.php';
 $title = 'Главная страница';
@@ -29,10 +14,8 @@ if ($_GET['auth'] == '0') {
     header("Location: /");
 }
 
-if (!empty($_GET['categories']) || isset($_SESSION['categories'])) {
-    $_SESSION['categories'] = $_GET['categories'];
+if (!empty($_GET['categories'])) {
     $categories = $_GET['categories'];
-    $categories = $_SESSION['categories'];
     $where .= 'AND categories.id = ' . intval($categories);
     $title = getTitle($categories)[0]['category'];
     $allProductsCategory = getAllProductsCategory($categories);
@@ -43,7 +26,6 @@ if (!empty($_GET['categories']) || isset($_SESSION['categories'])) {
 if ($_GET['new'] == '1') {
     $where.= 'AND products.status = "новинка"';
     $title = 'Новинки';
-    $_SESSION['new'] = $_GET['new'];
     $type = 'new';
     $status = 'новинка';
     $allProductStatus = getAllProductStatus($status);
@@ -52,7 +34,6 @@ if ($_GET['new'] == '1') {
 if ($_GET['sale'] == '1') {
     $where.= 'AND products.status = "распродажа"';
     $title = 'Распродажа';
-    $_SESSION['sale'] = $_GET['sale'];
     $type = 'sale';
     $status = 'Распродажа';
     $allProductStatus = getAllProductStatus($status);
@@ -60,24 +41,19 @@ if ($_GET['sale'] == '1') {
 
 if (!empty($_GET['maxPrice'])) {
     $where .= ' AND price  >= ' . intval($_GET['minPrice']);
-    $_SESSION['minPrice'] = $_GET['minPrice'];
 }
 
 if (!empty($_GET['minPrice'])) {
     $where .= ' AND price  < ' . intval($_GET['maxPrice']);
-    $_SESSION['maxPrice'] = $_GET['maxPrice'];
 }
 
 $order = ' ORDER BY price DESC';
 if ($_GET['sort']) {
     $order = 'ORDER BY' . $_GET['sort'];
-    $_SESSION['sort'] = $_GET['sort'];
-
 }
 
 if ($_GET['order']) {
     $order = $_GET['sort'];
-    $_SESSION['order'] = $_GET['order'];
 }
 
 $page = ' LIMIT 9';
@@ -168,20 +144,22 @@ if (isset($allProductsCategory)) {
 } else {
     $allProducts = getAllProducts();
     $countAllProducts = intval($allProducts["COUNT(*)"]); // колчество товаров
-    $numberPages = ($countAllProducts % 9) + 1;
+    $numberPages = (intdiv($countAllProducts, 9)) + 1;
 }
-
+if (isset($_GET['categories'])) {
+    $cat = $_GET['categories'];
+}
 
 $data = array(
     'minPrice' => $priceFrom,
     'maxPrice' => $priceTo,
     $type => '1',
-    'categories' => $_SESSION['category']
+    'categories' => $cat
 );
 $urls = '/?' .  http_build_query($data);
 
-
-require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/header.php';
+//var_dump($numberPages);
+require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
 ?>
     <main class="shop-page">
         <header class="intro">
@@ -192,7 +170,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/header.php';
         </header>
         <section class="shop container">
             <section class="shop__filter filter">
-                <form action="" method="get">
+                <form action="<?=$urls ?>" method="get">
                     <input id="minPriceHidden" class="hidden" name="minPrice" value="">
                     <input id="maxPriceHidden" class="hidden" name="maxPrice" value="">
                     <?php if(isset($_GET['categories'])) {?>
@@ -280,10 +258,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/header.php';
                     <?php endforeach ?>
                 </section>
                 <ul class="shop__paginator paginator">
-                    <li>
-                        <a class="paginator__item" href="/">1</a>
-                    </li>
-                    <?php for($i = 2; $i <= $numberPages; $i++) {?>
+                    <?php for($i = 1; $i <= $numberPages; $i++) {?>
                         <a class="paginator__item" href="/?page=<?=$i?>
                         <?php if (isset($_SESSION['categories']) && !isset($_GET['categories'])) { echo '&categories=' . $_SESSION['categories'];}?>"><?= $i ?></a>
                         <?php if (isset($_SESSION['new']) && !isset($_GET['new'])) { echo '&new=' . $_SESSION['new'];?>"><?php echo $i; } ?></a>

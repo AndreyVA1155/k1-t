@@ -371,6 +371,7 @@ if (document.querySelector('.shop-page')) {
             $("input[name=priceTo]").val($('.range__line').slider('values', 1));
             console.log($('.range__line').slider('values', 0));
             $('.min-price').text($('.range__line').slider('values', 0) + ' руб.');
+
             $('.max-price').text($('.range__line').slider('values', 1) + ' руб.');
 
         },
@@ -385,9 +386,15 @@ if (document.querySelector('.shop-page')) {
 }
 
 var button = document.getElementById('buttonIndex');
+var minPrice = $('#minPrice').text().replace(/.00.руб/g, '');
+var maxPrice = $('#maxPrice').text().replace(/.00.руб/g, '');
+
+
+
+
 button.addEventListener('click', function () {
-    document.getElementById('minPriceHidden').value = $('#minPrice').text().replace(/[^0-9]/g,"");
-    document.getElementById('maxPriceHidden').value = $('#maxPrice').text().replace(/[^0-9]/g,"");
+    document.getElementById('minPriceHidden').value = minPrice;
+    document.getElementById('maxPriceHidden').value = maxPrice;
 
 });
 
