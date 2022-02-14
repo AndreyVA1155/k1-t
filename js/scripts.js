@@ -388,13 +388,16 @@ if (document.querySelector('.shop-page')) {
 var button = document.getElementById('buttonIndex');
 var minPrice = $('#minPrice').text().replace(/.00.руб/g, '');
 var maxPrice = $('#maxPrice').text().replace(/.00.руб/g, '');
-
+var selectSort = document.getElementById("sort");
+var selectOrder = document.getElementById("order");
 
 
 
 button.addEventListener('click', function () {
     document.getElementById('minPriceHidden').value = minPrice;
     document.getElementById('maxPriceHidden').value = maxPrice;
+    alert(selectSort.value);
+    alert(selectOrder.value);
 
 });
 

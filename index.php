@@ -230,18 +230,18 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
             <div class="shop__wrapper">
                 <section class="shop__sorting">
                     <div class="shop__sorting-item custom-form__select-wrapper">
-                        <select class="custom-form__select" name="category">
-                            <option value="sort" hidden="">Сортировка</option>
+                        <select id="sort" class="custom-form__select" >
+                            <option hidden="">Сортировка</option>
                             <option value="price">По цене </option>
                             <option value="name">По названию </option>
                         </select>
                     </div>
 
                     <div class="shop__sorting-item custom-form__select-wrapper">
-                        <select class="custom-form__select" name="prices">
+                        <select id="order" class="custom-form__select" name="order">
                             <option hidden="">Порядок</option>
-                            <option value="all">По возрастанию</option>
-                            <option value="woman">По убыванию</option>
+                            <option value="ASC">По возрастанию</option>
+                            <option value="DESC">По убыванию</option>
                         </select>
                     </div>
                     <p class="shop__sorting-res">Найдено <span class="res-sort"><?=$count?></span> моделей</p>
