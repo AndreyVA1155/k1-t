@@ -91,7 +91,7 @@ $sthMax = connect()->prepare(
     "SELECT MAX(price) FROM products
     LEFT JOIN producttocategory ON products.id = producttocategory.product_id
     LEFT JOIN categories ON categories.id = producttocategory.category_id
-    " . $where . $order . $page);
+    " . $where . $order);
 $sthMax->execute();
 $priceToMax = intval($sthMax->fetchAll()[0]['MAX(price)'] ?? '');
 
@@ -99,7 +99,7 @@ $sthMin = connect()->prepare(
     "SELECT MIN(price) FROM products
     LEFT JOIN producttocategory ON products.id = producttocategory.product_id
     LEFT JOIN categories ON categories.id = producttocategory.category_id
-    " . $where . $order . $page);
+    " . $where . $order);
 $sthMin->execute();
 
 $priceFromMin = intval($sthMin->fetchAll()[0]['MIN(price)'] ?? '');
@@ -120,9 +120,16 @@ if (isset($_GET['page'])) {
         $priceArray[] = $item['price'];
     }
 }
-
-$priceFrom = $_GET['minPrice'] ?? '';
-$priceTo = $_GET['maxPrice'] ?? '';
+if (isset($_GET['minPrice'])) {
+    $priceFrom = $_GET['minPrice'];
+} else {
+    $priceFrom = $priceFromMin;
+}
+if (isset($_GET['maxPrice'])) {
+    $priceTo = $_GET['maxPrice'];
+} else {
+    $priceTo = $priceToMax;
+}
 
 if (!isset($_GET['minPrice']) && !isset($_GET['maxPrice'])) {
 
@@ -299,8 +306,12 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                 </section>
                 <ul class="shop__paginator paginator">
                     <?php for ($i = 1; $i <= $numberPages; $i++) { ?>
-                        <a class="paginator__item" href="<?= $urls . '&page=' . $i ?>"><?= $i ?></a>
-                    <?php } ?>
+                        <a class="paginator__item" href="<?php if(strpos($urls, 'page') !== false) {
+                            $urls = mb_substr($urls, 0, -7);
+                            echo $urls . '&page=' . $i ?>"><?= $i ?></a>
+                    <?php } else {
+                        echo $urls . '&page=' . $i ?>"><?= $i ?></a>
+                    <?php }} ?>
                 </ul>
             </div>
         </section>
