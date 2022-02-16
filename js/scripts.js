@@ -370,15 +370,15 @@ if (document.querySelector('.shop-page')) {
             $("input[name=priceFrom]").val($('.range__line').slider('values', 0));
             $("input[name=priceTo]").val($('.range__line').slider('values', 1));
             console.log($('.range__line').slider('values', 0));
-            $('.min-price').text($('.range__line').slider('values', 0) + ' руб.');
+            $('.min-price').text($('.range__line').slider('values', 0));
 
-            $('.max-price').text($('.range__line').slider('values', 1) + ' руб.');
+            $('.max-price').text($('.range__line').slider('values', 1));
 
         },
         slide: function (event, ui) {
 
-            $('.min-price').text($('.range__line').slider('values', 0) + ' руб.');
-            $('.max-price').text($('.range__line').slider('values', 1) + ' руб.');
+            $('.min-price').text($('.range__line').slider('values', 0));
+            $('.max-price').text($('.range__line').slider('values', 1));
 
         }
     });
@@ -390,14 +390,29 @@ var minPrice = $('#minPrice').text().replace(/.00.руб/g, '');
 var maxPrice = $('#maxPrice').text().replace(/.00.руб/g, '');
 var selectSort = document.getElementById("sort");
 var selectOrder = document.getElementById("order");
-
-
+var order = document.getElementById('selectOrder');
+var sort = document.getElementById('selectSort');
+var minPriceHidden = document.getElementById('minPriceHidden');
+var maxPriceHidden = document.getElementById('maxPriceHidden');
+var minPrice1 = $('#minPrice').text().replace(/.00.руб/g, '');
+var maxPrice1 = $('#maxPrice').text().replace(/.00.руб/g, '');
+var minPrice11 = parseInt(minPrice1.match(/\d+/));
+var maxPrice11 = parseInt(maxPrice1.match(/\d+/));
 
 button.addEventListener('click', function () {
     document.getElementById('minPriceHidden').value = minPrice;
     document.getElementById('maxPriceHidden').value = maxPrice;
-    alert(selectSort.value);
-    alert(selectOrder.value);
+    order.value = selectOrder.value;
+    sort.value = selectSort.value;
+    minPriceHidden.value = $('#minPrice').text().replace(/.00.руб/g, '');;
+    maxPriceHidden.value = maxPrice11;
+    //alert(minPriceHidden.value);
+    //alert(minPriceHidden.value);
+    // alert(maxPriceHidden.value);
+    // alert(order.value);
+    // alert(sort.value);
+    //minPriceHidden.value = parseInt(minPrice1.match(/\d+/));
+
 
 });
 

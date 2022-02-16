@@ -7,7 +7,7 @@ session_start();
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/function.php';
 $title = 'Главная страница';
-$where ='WHERE 1 ';
+$where = 'WHERE 1 ';
 
 if ($_GET['auth'] == '0') {
     session_destroy();
@@ -16,7 +16,7 @@ if ($_GET['auth'] == '0') {
 
 if (!empty($_GET['categories'])) {
     $categories = $_GET['categories'];
-    $where .= 'AND categories.id = ' . intval($categories);
+    $where .= ' AND categories.id = ' . intval($categories);
     $title = getTitle($categories)[0]['category'];
     $allProductsCategory = getAllProductsCategory($categories);
 
@@ -24,7 +24,7 @@ if (!empty($_GET['categories'])) {
 
 
 if ($_GET['new'] == '1') {
-    $where.= 'AND products.status = "новинка"';
+    $where .= ' AND products.status = "новинка"';
     $title = 'Новинки';
     $type = 'new';
     $status = 'новинка';
@@ -32,7 +32,7 @@ if ($_GET['new'] == '1') {
 
 }
 if ($_GET['sale'] == '1') {
-    $where.= 'AND products.status = "распродажа"';
+    $where .= ' AND products.status = "распродажа"';
     $title = 'Распродажа';
     $type = 'sale';
     $status = 'Распродажа';
@@ -40,25 +40,30 @@ if ($_GET['sale'] == '1') {
 }
 
 if (!empty($_GET['maxPrice'])) {
-    $where .= ' AND price  >= ' . intval($_GET['minPrice']);
+    $where .= ' AND price  > ' . intval($_GET['minPrice']);
 }
 
 if (!empty($_GET['minPrice'])) {
     $where .= ' AND price  < ' . intval($_GET['maxPrice']);
 }
 
-$order = ' ORDER BY price DESC';
-if ($_GET['sort']) {
-    $order = 'ORDER BY' . $_GET['sort'];
+$order = ' ORDER BY price ASC';
+if ($_GET['sort'] == 'name') {
+    $order = ' ORDER BY name ASC';
 }
 
-if ($_GET['order']) {
-    $order = $_GET['sort'];
+if ($_GET['order'] == 'DESC' && $_GET['sort'] == 'name') {
+    $order = ' ORDER BY name DESC';
+} elseif ($_GET['order'] == 'DESC' && $_GET['sort'] == 'price') {
+    $order = ' ORDER BY price DESC';
+} elseif ($_GET['order'] == 'ASC' && $_GET['sort'] == 'name') {
+    $order = ' ORDER BY name ASC';
 }
+
 
 $page = ' LIMIT 9';
 if (!empty($_GET['page'])) {
-    $page = ' LIMIT 9 OFFSET ' . (($_GET['page'] - 1) * 9 );
+    $page = ' LIMIT 9 OFFSET ' . (($_GET['page'] - 1) * 9);
 }
 
 $sth = connect()->prepare(
@@ -67,6 +72,13 @@ $sth = connect()->prepare(
     LEFT JOIN categories ON categories.id = producttocategory.category_id
     " . $where . $order . $page);
 $sth->execute();
+
+$sthAllProducts = connect()->prepare(
+    "SELECT * FROM products
+    LEFT JOIN producttocategory ON products.id = producttocategory.product_id
+    LEFT JOIN categories ON categories.id = producttocategory.category_id
+    " . $where . $order);
+$sthAllProducts->execute();
 
 $sthCount = connect()->prepare(
     "SELECT COUNT(*) FROM products 
@@ -92,6 +104,7 @@ $sthMin->execute();
 
 $priceFromMin = intval($sthMin->fetchAll()[0]['MIN(price)'] ?? '');
 
+$allProduct = $sthAllProducts->fetchAll();
 $products = $sth->fetchAll();
 $count = count($products);
 
@@ -118,14 +131,13 @@ if (!isset($_GET['minPrice']) && !isset($_GET['maxPrice'])) {
     $max = null;
     $max_key = null;
 
-    for($i = 0; $i < count($priceArray); $i++)
-    {
-        if($priceArray[$i] > $max or $max === null) {
+    for ($i = 0; $i < count($priceArray); $i++) {
+        if ($priceArray[$i] > $max or $max === null) {
             $max = $priceArray[$i];
             $max_key = $i;
         }
 
-        if($priceArray[$i] < $min or $min === null) {
+        if ($priceArray[$i] < $min or $min === null) {
             $min = $priceArray[$i];
             $min_key = $i;
         }
@@ -138,29 +150,44 @@ if (!isset($_GET['minPrice']) && !isset($_GET['maxPrice'])) {
 }
 
 if (isset($allProductsCategory)) {
-    $numberPages = ($allProductsCategory % 9) +1;
-} elseif (isset($allProductStatus)) {
-    $numberPages = ($allProductStatus % 9) +1;
+    if ($allProductsCategory['COUNT(*)'] <= 9) {
+        $numberPages = 1;
+    } elseif ($allProductsCategory['COUNT(*)'] > 9) {
+        $allProductsCategory = intval($allProductsCategory["COUNT(*)"]); // колчество товаров
+        $numberPages = (intdiv($allProductsCategory, 9)) + 1;
+    } elseif ($allProductsCategory <= 9) {
+        $numberPages = 1;
+    } elseif ($allProductsCategory > 9) {
+        $allProductsCategory = intval($allProductsCategory); // колчество товаров
+        $numberPages = (intdiv($allProductsCategory, 9)) + 1;
+    }
 } else {
-    $allProducts = getAllProducts();
-    $countAllProducts = intval($allProducts["COUNT(*)"]); // колчество товаров
-    $numberPages = (intdiv($countAllProducts, 9)) + 1;
+    $countProduct = 0 ;
+    foreach ($allProduct as $value) {
+        if (isset($value['name'])) {
+            $countProduct = $countProduct + 1;
+        }
+    }
+    $numberPages = (intdiv($countProduct, 9)) + 1;
 }
+
 if (isset($_GET['categories'])) {
     $cat = $_GET['categories'];
 }
 
-$data = array(
-    'minPrice' => $priceFrom,
-    'maxPrice' => $priceTo,
-    $type => '1',
-    'categories' => $cat
-);
-$urls = '/?' .  http_build_query($data);
+$data = $_GET;
+$urls = '/?' . http_build_query($data);
 
-//var_dump($numberPages);
+$countProduct = 0 ;
+foreach ($allProduct as $value) {
+    if (isset($value['name'])) {
+        $countProduct = $countProduct + 1;
+    }
+}
+
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
 ?>
+
     <main class="shop-page">
         <header class="intro">
             <div class="intro__wrapper">
@@ -170,38 +197,43 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
         </header>
         <section class="shop container">
             <section class="shop__filter filter">
-                <form action="<?=$urls ?>" method="get">
+                <form action="/" method="get">
                     <input id="minPriceHidden" class="hidden" name="minPrice" value="">
                     <input id="maxPriceHidden" class="hidden" name="maxPrice" value="">
-                    <?php if(isset($_GET['categories'])) {?>
-                    <input id="idCategories" class="hidden" name="<?= $_GET['categories']?>" value="<?= $_GET['categories']?>">
+                    <?php if (isset($_GET['categories'])) { ?>
+                        <input type="text" id="idCategories" class="hidden" name="categories"
+                               value="<?= $_GET['categories'] ?>">
                     <?php } ?>
+                    <input id="selectSort" class="hidden" name="sort" value="">
+                    <input id="selectOrder" class="hidden" name="order" value="">
                     <div
-                        class='hidden'
-                        data-min='<?= $priceFromMin ?>'
-                        data-max='<?= $priceToMax ?>'
+                            class='hidden'
+                            data-min='<?= $priceFromMin ?>'
+                            data-max='<?= $priceToMax ?>'
                     ></div>
                     <div class="filter__wrapper">
                         <b class="filter__title">Категории</b>
                         <ul class="filter__list">
                             <?php if ($_SERVER['REQUEST_URI'] == '/') { ?>
-                            <li>
-                                <a class="filter__list-item active" href="/">Все</a>
-                            </li>
+                                <li>
+                                    <a class="filter__list-item active" href="/">Все</a>
+                                </li>
                             <?php } else { ?>
-                            <li>
-                                <a class="filter__list-item" href="/">Все</a>
-                            </li>
+                                <li>
+                                    <a class="filter__list-item" href="/">Все</a>
+                                </li>
                             <?php } ?>
                             <?php foreach (categories() as $item): ?>
                                 <?php if ($_SERVER['REQUEST_URI'] == $item['path']) { ?>
                                     <li>
-                                        <a id="<?=$item['id'] ?>" class="filter__list-item active" href="<?=$item['path']?>"><?=$item['category']?></a>
+                                        <a id="<?= $item['id'] ?>" class="filter__list-item active"
+                                           href="<?= $item['path'] ?>"><?= $item['category'] ?></a>
                                     </li>
                                 <?php } else { ?>
-                                <li>
-                                    <a id="<?=$item['id'] ?>" class="filter__list-item" href="<?=$item['path']?>"><?=$item['category']?></a>
-                                </li>
+                                    <li>
+                                        <a id="<?= $item['id'] ?>" class="filter__list-item"
+                                           href="<?= $item['path'] ?>"><?= $item['category'] ?></a>
+                                    </li>
                                 <?php } ?>
                             <?php endforeach ?>
                         </ul>
@@ -212,28 +244,36 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                             <span class="range__info">Цена</span>
                             <div class="range__line" aria-label="Range Line"></div>
                             <div class="range__res">
-                                <span id="minPrice" class="range__res-item min-price"><?=$priceFrom?>.руб</span>
-                                <span id="maxPrice" class="range__res-item max-price"><?=$priceTo?>.руб</span>
+                                <span id="minPrice" class="range__res-item min-price"><?= $priceFrom ?></span>
+                                <span id="maxPrice" class="range__res-item max-price"><?= $priceTo ?></span>
                             </div>
                         </div>
                     </div>
                     <fieldset class="custom-form__group">
-                        <input type="checkbox" name="new" id="new" class="custom-form__checkbox" value="1" <?php $new = $_GET['new'] ?? ''; if($new == '1') { echo 'checked';} ?>>
+                        <input type="checkbox" name="new" id="new" class="custom-form__checkbox"
+                               value="1" <?php $new = $_GET['new'] ?? '';
+                        if ($new == '1') {
+                            echo 'checked';
+                        } ?>>
                         <label for="new" class="custom-form__checkbox-label custom-form__info" style="display: block;">Новинка</label>
-                        <input type="checkbox" name="sale" id="sale" class="custom-form__checkbox"  value="1" <?php $sale = $_GET['sale'] ?? '';  if($sale == '1') { echo 'checked';} ?>>
+                        <input type="checkbox" name="sale" id="sale" class="custom-form__checkbox"
+                               value="1" <?php $sale = $_GET['sale'] ?? '';
+                        if ($sale == '1') {
+                            echo 'checked';
+                        } ?>>
                         <label for="sale" class="custom-form__checkbox-label custom-form__info" style="display: block;">Распродажа</label>
                     </fieldset>
-                    <button id="buttonIndex" class="button" type="submit" style="width: 100%" >Применить</button>
+                    <button id="buttonIndex" class="button" type="submit" style="width: 100%">Применить</button>
                 </form>
             </section>
 
             <div class="shop__wrapper">
                 <section class="shop__sorting">
                     <div class="shop__sorting-item custom-form__select-wrapper">
-                        <select id="sort" class="custom-form__select" >
+                        <select id="sort" class="custom-form__select">
                             <option hidden="">Сортировка</option>
-                            <option value="price">По цене </option>
-                            <option value="name">По названию </option>
+                            <option value="price">По цене</option>
+                            <option value="name">По названию</option>
                         </select>
                     </div>
 
@@ -244,25 +284,22 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                             <option value="DESC">По убыванию</option>
                         </select>
                     </div>
-                    <p class="shop__sorting-res">Найдено <span class="res-sort"><?=$count?></span> моделей</p>
+                    <p class="shop__sorting-res">Найдено <span class="res-sort"><?= $count ?></span> моделей</p>
                 </section>
                 <section class="shop__list">
                     <?php foreach ($products as $product): ?>
-                    <article class="shop__item product" tabindex="0">
-                        <div class="product__image">
-                            <img src="<?=$product['imp_path']?>" alt="<?=$product['img']?>">
-                        </div>
-                        <p class="product__name"><?=$product['name']?></p>
-                        <span id="priceProduct" class="product__price"><?=$product['price']?> .руб</span>
-                    </article>
+                        <article class="shop__item product" tabindex="0">
+                            <div class="product__image">
+                                <img src="<?= $product['imp_path'] ?>" alt="<?= $product['img'] ?>">
+                            </div>
+                            <p class="product__name"><?= $product['name'] ?></p>
+                            <span id="priceProduct" class="product__price"><?= $product['price'] ?> .руб</span>
+                        </article>
                     <?php endforeach ?>
                 </section>
                 <ul class="shop__paginator paginator">
-                    <?php for($i = 1; $i <= $numberPages; $i++) {?>
-                        <a class="paginator__item" href="/?page=<?=$i?>
-                        <?php if (isset($_SESSION['categories']) && !isset($_GET['categories'])) { echo '&categories=' . $_SESSION['categories'];}?>"><?= $i ?></a>
-                        <?php if (isset($_SESSION['new']) && !isset($_GET['new'])) { echo '&new=' . $_SESSION['new'];?>"><?php echo $i; } ?></a>
-                        <?php if (isset($_SESSION['sale']) && !isset($_GET['sale'])) { echo '&sale=' . $_SESSION['sale'];?>"><?php echo $i; } ?></a>
+                    <?php for ($i = 1; $i <= $numberPages; $i++) { ?>
+                        <a class="paginator__item" href="<?= $urls . '&page=' . $i ?>"><?= $i ?></a>
                     <?php } ?>
                 </ul>
             </div>
@@ -270,7 +307,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
         <section class="shop-page__order" hidden="">
             <div class="shop-page__wrapper">
                 <h2 class="h h--1">Оформление заказа</h2>
-                <form id="delivery" action="<?= $urls?>"  class="custom-form js-order" name="addOrder">
+                <form id="delivery" action="<?= $urls ?>" class="custom-form js-order" name="addOrder">
                     <fieldset class="custom-form__group">
                         <legend class="custom-form__title">Укажите свои личные данные</legend>
                         <p class="custom-form__info">
@@ -322,7 +359,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                                 <td>Наличными или банковской картой</td>
                             </tr>
                             <tr>
-                                <td class="custom-table__head">Срок доставки: </td>
+                                <td class="custom-table__head">Срок доставки:</td>
                                 <td class="date">13 декабря—15 декабря</td>
                             </tr>
                         </table>
@@ -343,11 +380,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                                     <p class="custom-form__input-label">Улица <span class="req">*</span></p>
                                 </label>
                                 <label class="custom-form__input-wrapper" for="home">
-                                    <input id="home" class="custom-form__input custom-form__input--small" type="text" name="home">
+                                    <input id="home" class="custom-form__input custom-form__input--small" type="text"
+                                           name="home">
                                     <p class="custom-form__input-label">Дом <span class="req">*</span></p>
                                 </label>
                                 <label class="custom-form__input-wrapper" for="apartment">
-                                    <input id="aprt" class="custom-form__input custom-form__input--small" type="text" name="apartment">
+                                    <input id="aprt" class="custom-form__input custom-form__input--small" type="text"
+                                           name="apartment">
                                     <p class="custom-form__input-label">Квартира <span class="req">*</span></p>
                                 </label>
                             </div>
@@ -379,4 +418,3 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
 
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles' . '/footer.php';
-
