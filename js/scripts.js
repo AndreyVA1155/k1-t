@@ -288,17 +288,16 @@ if (addList) {
     const popupEnd = document.querySelector('.page-add__popup-end');
 
     $(document).ready(function (e) {
-        $("#addProduct").on('submit',(function(e) {
+        $("#addProduct").on('submit', (function (e) {
             e.preventDefault();
             $.ajax({
                 url: '/admin/ajax/addProduct.php',
                 type: "POST",
-                data:  new FormData(this),
+                data: new FormData(this),
                 contentType: false,
                 cache: false,
-                processData:false,
-                success: function(data)
-                {
+                processData: false,
+                success: function (data) {
                     console.log(data)
                 }
             });
@@ -404,7 +403,7 @@ button.addEventListener('click', function () {
     document.getElementById('maxPriceHidden').value = maxPrice;
     order.value = selectOrder.value;
     sort.value = selectSort.value;
-    minPriceHidden.value = $('#minPrice').text().replace(/.00.руб/g, '');;
+    minPriceHidden.value = $('#minPrice').text().replace(/.00.руб/g, '');
     maxPriceHidden.value = maxPrice11;
     //alert(minPriceHidden.value);
     //alert(minPriceHidden.value);
@@ -412,7 +411,7 @@ button.addEventListener('click', function () {
     // alert(order.value);
     // alert(sort.value);
     //minPriceHidden.value = parseInt(minPrice1.match(/\d+/));
-
+    //alert($('div.hidden').data('max'));
 
 });
 

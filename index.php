@@ -106,17 +106,17 @@ $priceFromMin = intval($sthMin->fetchAll()[0]['MIN(price)'] ?? '');
 
 $allProduct = $sthAllProducts->fetchAll();
 $products = $sth->fetchAll();
-$count = count($products);
+$count = count($allProduct);
 
 if (isset($_GET['page'])) {
     $count = count(array_map('count', $products)); //число продуктов на странице
 
     $priceArray = [];
-    foreach ($products as $item) { //получение массива с ценами
+    foreach ($allProduct as $item) { //получение массива с ценами
         $priceArray[] = $item['price'];
     }
 } else {
-    foreach ($products as $item) {
+    foreach ($allProduct as $item) {
         $priceArray[] = $item['price'];
     }
 }
@@ -138,7 +138,7 @@ if (!isset($_GET['minPrice']) && !isset($_GET['maxPrice'])) {
     $max = null;
     $max_key = null;
 
-    for ($i = 0; $i < count($priceArray); $i++) {
+    for ($i = 0; $i < count($allProduct); $i++) {
         if ($priceArray[$i] > $max or $max === null) {
             $max = $priceArray[$i];
             $max_key = $i;
@@ -175,7 +175,12 @@ if (isset($allProductsCategory)) {
             $countProduct = $countProduct + 1;
         }
     }
-    $numberPages = (intdiv($countProduct, 9)) + 1;
+    if (($countProduct %9) == 0) {
+        $numberPages = (intdiv($countProduct, 9));
+    } else {
+        $numberPages = (intdiv($countProduct, 9)) + 1;
+    }
+
 }
 
 if (isset($_GET['categories'])) {
@@ -191,7 +196,7 @@ foreach ($allProduct as $value) {
         $countProduct = $countProduct + 1;
     }
 }
-
+var_dump(count($allProduct));
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
 ?>
 
