@@ -17,9 +17,11 @@ if($_POST['delivery'] == 0) {
     $_POST['home'] = NULL;
     $_POST['apartment'] = NULL;
 }
+
 if ($_POST['delivery'] == 1 && $priceProduct < MINCOSTORDER) {
     $priceProduct = $priceProduct + COSTDELIVERY;
 }
+
 var_dump($_POST);
 $addOrder = connect()->prepare("
     INSERT INTO orders ( name, surname, thirdName, phone, email, delivery, city, street, home, apartment, payment, comment, status, data_create, price)

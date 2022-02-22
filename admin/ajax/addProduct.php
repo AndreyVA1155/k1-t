@@ -2,6 +2,9 @@
 
 namespace functionAll;
 
+if (isset($_POST['send'])) {
+    header('Location: /');
+}
 require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/function.php';
 

@@ -196,7 +196,6 @@ foreach ($allProduct as $value) {
         $countProduct = $countProduct + 1;
     }
 }
-var_dump(count($allProduct));
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
 ?>
 
@@ -210,14 +209,14 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
         <section class="shop container">
             <section class="shop__filter filter">
                 <form action="/" method="get">
-                    <input id="minPriceHidden" class="hidden" name="minPrice" value="">
-                    <input id="maxPriceHidden" class="hidden" name="maxPrice" value="">
+                    <input type="hidden" id="minPriceHidden" class="hidden" name="minPrice" value="">
+                    <input type="hidden" id="maxPriceHidden" class="hidden" name="maxPrice" value="">
                     <?php if (isset($_GET['categories'])) { ?>
-                        <input type="text" id="idCategories" class="hidden" name="categories"
+                        <input type="hidden" type="text" id="idCategories" class="hidden" name="categories"
                                value="<?= $_GET['categories'] ?>">
                     <?php } ?>
-                    <input id="selectSort" class="hidden" name="sort" value="">
-                    <input id="selectOrder" class="hidden" name="order" value="">
+                    <input type="hidden" id="selectSort" class="hidden" name="sort" value="">
+                    <input type="hidden" id="selectOrder" class="hidden" name="order" value="">
                     <div
                             class='hidden'
                             data-min='<?= $priceFromMin ?>'
@@ -300,12 +299,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                 </section>
                 <section class="shop__list">
                     <?php foreach ($products as $product): ?>
-                        <article class="shop__item product" tabindex="0">
+                        <article data-price="<?= $product['price']; ?>" class="shop__item product" tabindex="0">
                             <div class="product__image">
                                 <img src="<?= $product['imp_path'] ?>" alt="<?= $product['img'] ?>">
                             </div>
                             <p class="product__name"><?= $product['name'] ?></p>
-                            <span id="priceProduct" class="product__price"><?= $product['price'] ?> .руб</span>
+                            <span id="priceProduct" class="product__price"><?= $product['price']; ?> .руб
+                            </span>
                         </article>
                     <?php endforeach ?>
                 </section>
@@ -315,7 +315,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                             $urls = mb_substr($urls, 0, -7);
                             echo $urls . '&page=' . $i ?>"><?= $i ?></a>
                     <?php } else {
-                        echo $urls . '&page=' . $i ?>"><?= $i ?></a>
+                        echo $urls . 'page=' . $i ?>"><?= $i ?></a>
                     <?php }} ?>
                 </ul>
             </div>

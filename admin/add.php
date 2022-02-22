@@ -7,7 +7,6 @@ $title = 'Добавление товара';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/admin/header.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/function.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
-//require_once $_SERVER['DOCUMENT_ROOT'] . '/admin' . '/ajax/addProduct.php';
 ?>
 
 <main class="page-add">

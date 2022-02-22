@@ -109,8 +109,12 @@ if (shopList) {
     shopList.addEventListener('click', (evt) => {
 
         const prod = evt.path || (evt.composedPath && evt.composedPath());
+        //const price = prod.dataset.price;
 
-        var priceProduct = $('#priceProduct').text();
+        console.log(prod);
+        //console.log($('prod').attr('data-price'));
+        // var align = prod.getAttribute("data-price");
+        //console.log($('article.shop__item.product').attributes.attributes.value());
 
         if (prod.some(pathItem => pathItem.classList && pathItem.classList.contains('shop__item'))) {
 
@@ -286,23 +290,26 @@ if (addList) {
 
     const buttonAddProductButton = document.getElementById('buttonAddProduct');
     const popupEnd = document.querySelector('.page-add__popup-end');
-
-    $(document).ready(function (e) {
-        $("#addProduct").on('submit', (function (e) {
-            e.preventDefault();
-            $.ajax({
-                url: '/admin/ajax/addProduct.php',
-                type: "POST",
-                data: new FormData(this),
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function (data) {
-                    console.log(data)
-                }
-            });
-        }));
+    buttonAddProductButton.addEventListener('click', function () {
+        $(document).ready(function (e) {
+            $("#addProduct").on('submit', (function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/admin/ajax/addProduct.php',
+                    type: "POST",
+                    data: new FormData(this),
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function (data) {
+                        console.log(data)
+                    }
+                });
+            }));
+            location.href='/';
+        });
     });
+
 }
 const buttonAddOrder = document.getElementById('buttonAddOrder');
 
@@ -310,9 +317,9 @@ if (buttonAddOrder) {
     {
         buttonAddOrder.addEventListener('click', (evt) => {
             evt.preventDefault();
-            var priceProduct = $('#priceProduct').text();
+            //var priceProduct = $('#priceProduct').text();
             var data = $('#delivery').serializeArray();
-            data.push({name: "priceProduct", value: priceProduct});
+            //data.push({name: "priceProduct", value: priceProduct});
             $.ajax({
                 type: 'POST',
                 url: '/admin/ajax/addOrder.php',
@@ -393,10 +400,8 @@ var order = document.getElementById('selectOrder');
 var sort = document.getElementById('selectSort');
 var minPriceHidden = document.getElementById('minPriceHidden');
 var maxPriceHidden = document.getElementById('maxPriceHidden');
-var minPrice1 = $('#minPrice').text().replace(/.00.руб/g, '');
-var maxPrice1 = $('#maxPrice').text().replace(/.00.руб/g, '');
-var minPrice11 = parseInt(minPrice1.match(/\d+/));
-var maxPrice11 = parseInt(maxPrice1.match(/\d+/));
+
+
 
 button.addEventListener('click', function () {
     document.getElementById('minPriceHidden').value = minPrice;
@@ -404,14 +409,7 @@ button.addEventListener('click', function () {
     order.value = selectOrder.value;
     sort.value = selectSort.value;
     minPriceHidden.value = $('#minPrice').text().replace(/.00.руб/g, '');
-    maxPriceHidden.value = maxPrice11;
-    //alert(minPriceHidden.value);
-    //alert(minPriceHidden.value);
-    // alert(maxPriceHidden.value);
-    // alert(order.value);
-    // alert(sort.value);
-    //minPriceHidden.value = parseInt(minPrice1.match(/\d+/));
-    //alert($('div.hidden').data('max'));
+    maxPriceHidden.value = $('#maxPrice').text().replace(/.00.руб/g, '');
 
 });
 
