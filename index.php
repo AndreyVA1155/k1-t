@@ -299,9 +299,9 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
                 </section>
                 <section class="shop__list">
                     <?php foreach ($products as $product): ?>
-                        <article data-price="<?= $product['price']; ?>" class="shop__item product" tabindex="0">
+                        <article data-id="<?= $product['id'] ?>" data-price="<?= $product['price'] ?>" class="shop__item product" tabindex="0">
                             <div class="product__image">
-                                <img src="<?= $product['imp_path'] ?>" alt="<?= $product['img'] ?>">
+                                <img src="<?= $product['imp_path']  ?>" alt="<?= $product['img'] ?>">
                             </div>
                             <p class="product__name"><?= $product['name'] ?></p>
                             <span id="priceProduct" class="product__price"><?= $product['price']; ?> .руб
@@ -321,6 +321,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/appFiles/header.php';
             </div>
         </section>
         <section class="shop-page__order" hidden="">
+            <input type="hidden" type="text" id="price" class="hidden" value="">
             <div class="shop-page__wrapper">
                 <h2 class="h h--1">Оформление заказа</h2>
                 <form id="delivery" action="<?= $urls ?>" class="custom-form js-order" name="addOrder">
